@@ -194,12 +194,13 @@ class Index {
         size_t M,
         size_t efConstruction,
         size_t random_seed,
-        bool allow_replace_deleted) {
+        bool allow_replace_deleted,
+        double mult) {
         if (appr_alg) {
             throw std::runtime_error("The index is already initiated.");
         }
         cur_l = 0;
-        appr_alg = new hnswlib::HierarchicalNSW<dist_t>(l2space, maxElements, M, efConstruction, random_seed, allow_replace_deleted);
+        appr_alg = new hnswlib::HierarchicalNSW<dist_t>(l2space, maxElements, M, efConstruction, random_seed, allow_replace_deleted, mult);
         index_inited = true;
         ep_added = false;
         appr_alg->ef_ = default_ef;
@@ -921,7 +922,9 @@ PYBIND11_PLUGIN(hnswlib) {
             py::arg("M") = 16,
             py::arg("ef_construction") = 200,
             py::arg("random_seed") = 100,
-            py::arg("allow_replace_deleted") = false)
+            py::arg("allow_replace_deleted") = false,
+            py::arg("mult") = 0.0
+            )
         .def("knn_query",
             &Index<float>::knnQuery_return_numpy,
             py::arg("data"),

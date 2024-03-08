@@ -92,7 +92,9 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
         size_t M = 16,
         size_t ef_construction = 200,
         size_t random_seed = 100,
-        bool allow_replace_deleted = false)
+        bool allow_replace_deleted = false,
+        double mult = 0.0
+        )
         : label_op_locks_(MAX_LABEL_OPERATION_LOCKS),
             link_list_locks_(max_elements),
             element_levels_(max_elements),
@@ -139,7 +141,10 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
         if (linkLists_ == nullptr)
             throw std::runtime_error("Not enough memory: HierarchicalNSW failed to allocate linklists");
         size_links_per_element_ = maxM_ * sizeof(tableint) + sizeof(linklistsizeint);
-        mult_ = 1 / log(1.0 * M_);
+        mult_ = mult != 0.0 ? mult : 1 / log(1.0 * M_);
+        if (mult == 0.0) {
+            std::cout << "selected mult=" << mult_ << std::endl;
+        }
         revSize_ = 1.0 / mult_;
     }
 
