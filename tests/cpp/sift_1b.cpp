@@ -256,10 +256,10 @@ inline bool exists_test(const std::string &name) {
 }
 
 
-void sift_test1B() {
-    int subset_size_milllions = 200;
-    int efConstruction = 40;
-    int M = 16;
+void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M = 16) {
+    // int subset_size_milllions = 1;
+    // int efConstruction = 40;
+    // int M = 16;
 
     size_t vecsize = subset_size_milllions * 1000000;
 
@@ -267,11 +267,11 @@ void sift_test1B() {
     size_t vecdim = 128;
     char path_index[1024];
     char path_gt[1024];
-    const char *path_q = "../bigann/bigann_query.bvecs";
-    const char *path_data = "../bigann/bigann_base.bvecs";
+    const char *path_q = "../../bigann/bigann_query.bvecs";
+    const char *path_data = "../../bigann/bigann_base.bvecs";
     snprintf(path_index, sizeof(path_index), "sift1b_%dm_ef_%d_M_%d.bin", subset_size_milllions, efConstruction, M);
 
-    snprintf(path_gt, sizeof(path_gt), "../bigann/gnd/idx_%dM.ivecs", subset_size_milllions);
+    snprintf(path_gt, sizeof(path_gt), "../../bigann/gnd/idx_%dM.ivecs", subset_size_milllions);
 
     unsigned char *massb = new unsigned char[vecdim];
 
@@ -371,7 +371,7 @@ void sift_test1B() {
 
 
     vector<std::priority_queue<std::pair<int, labeltype >>> answers;
-    size_t k = 1;
+    size_t k = 10;
     cout << "Parsing gt:\n";
     get_gt(massQA, massQ, mass, vecsize, qsize, l2space, vecdim, answers, k);
     cout << "Loaded gt\n";
@@ -379,4 +379,24 @@ void sift_test1B() {
         test_vs_recall(massQ, vecsize, qsize, *appr_alg, vecdim, answers, k);
     cout << "Actual memory usage: " << getCurrentRSS() / 1000000 << " Mb \n";
     return;
+}
+
+int main() {
+    char c;
+    cin >> c;
+    vector<int> Ms = {16, 32};
+    vector<int> efConstructions = {200};
+    // vector<int> efConstructions = {100, 200};
+    // vector<int> efConstructions = {10, 20, 40, 100, 200};
+    vector<int> subsets = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
+    // vector<int> subsets = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
+    for (auto subset: subsets) {
+        for (auto efConstruction: efConstructions) {
+            for(auto M : Ms) {
+                sift_test1B(subset, efConstruction, M);
+                return 0;
+            }
+        }
+    }
+    return 0;
 }
