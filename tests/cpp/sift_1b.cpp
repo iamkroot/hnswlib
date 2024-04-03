@@ -164,6 +164,8 @@ get_gt(
     }
 }
 
+static constexpr bool DUMP = false;
+
 static float
 test_approx(
     unsigned char *massQ,
@@ -175,6 +177,12 @@ test_approx(
     size_t k) {
     size_t correct = 0;
     size_t total = 0;
+
+    std::ofstream cpp_gnd("cpp_gnd");
+    std::ofstream cpp_hnsw("cpp_hnsw");
+    if (!cpp_gnd) {
+        cout << "AAAA\n";
+    }
     // uncomment to test in parallel mode:
     //#pragma omp parallel for
     for (int i = 0; i < qsize; i++) {
@@ -184,19 +192,28 @@ test_approx(
         total += gt.size();
 
         while (gt.size()) {
+            if constexpr (DUMP)
+                cpp_gnd << gt.top().second << " ";
             g.insert(gt.top().second);
             gt.pop();
         }
+        if constexpr (DUMP)
+            cpp_gnd << "\n";
 
         while (result.size()) {
+            if constexpr (DUMP)
+                cpp_hnsw << result.top().second << " ";
             if (g.find(result.top().second) != g.end()) {
                 correct++;
             } else {
             }
             result.pop();
+
         }
+        if constexpr (DUMP)
+            cpp_hnsw << "\n";
     }
-    return 1.0f * correct / total;
+    return (1.0f * correct) / total;
 }
 
 static void
