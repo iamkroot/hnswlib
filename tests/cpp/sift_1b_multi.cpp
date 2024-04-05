@@ -356,7 +356,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
     for (int idx_num = 0; idx_num < num_idxs; ++idx_num) {
         size_t random_seed = 100 + idx_num;
         if (idx_num>0) {
-            snprintf(path_index, sizeof(path_index), "/scratch/hnswlib/multi/sift1b_v%d_%dm_ef_%d_M_%d.bin", idx_num, subset_size_milllions, efConstruction, M);
+            snprintf(path_index, sizeof(path_index), "/scratch/hnswlib/multi/sift1b_%dm_ef_%d_M_%d_v%d.bin", idx_num, subset_size_milllions, efConstruction, M);
         }
         ifstream input(path_data, ios::binary);
         if (exists_test(path_index)) {
