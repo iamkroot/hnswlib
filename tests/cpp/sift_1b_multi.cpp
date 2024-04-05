@@ -287,6 +287,10 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
     // int subset_size_milllions = 1;
     // int efConstruction = 40;
     // int M = 16;
+    cout << "subset size " << subset_size_milllions << "\n";
+    cout << "efConstruction " << efConstruction << "\n";
+    cout << "M " << M << "\n";
+    cout << "num_idxs " << num_idxs << "\n";
 
     size_t vecsize = subset_size_milllions * 1000000;
 
