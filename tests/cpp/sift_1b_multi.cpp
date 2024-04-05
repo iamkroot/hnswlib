@@ -196,6 +196,7 @@ test_approx(
     vector<std::priority_queue<std::pair<int, labeltype>>> &answers,
     vector<std::unordered_set<labeltype>> &answers_sets,
     size_t k) {
+    size_t correct0 = 0;
     size_t correct = 0;
     size_t total = 0;
 
@@ -212,9 +213,22 @@ test_approx(
         }
         unordered_set<labeltype> &g = answers_sets[i];
         total += results[0].size();
-        // TODO: Combine the results from all the indexes.
-        correct += get_intersection_count(results[0], g);
+        std::priority_queue<std::pair<int, labeltype >> result0(results[0]);
+        correct0 += get_intersection_count(result0, g);
+        // Combine the results from all the indexes.
+        std::priority_queue<std::pair<int, labeltype >> result;
+        for (auto &res: results) {
+            while (res.size()) {
+                result.emplace(res.top());
+                res.pop();
+            }
+            while(result.size() > k) {
+                result.pop();
+            }
+        }
+        correct += get_intersection_count(result, g);
     }
+    cout << (1.0f * correct0) / total << endl; 
     return (1.0f * correct) / total;
 }
 
@@ -453,7 +467,7 @@ int main() {
     // vector<int> subsets = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
     vector<int> subsets = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
     for (auto subset: subsets) {
-        // sift_test1B(subset, 200, 16, 1);
+        // sift_test1B(subset, 200, 16, 2);
         // break;
         for (auto efConstruction: efConstructions) {
             for(auto M : Ms) {
