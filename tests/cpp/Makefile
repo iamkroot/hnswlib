@@ -4,8 +4,14 @@ sift_dbg: sift_1b.cpp
 sift: sift_1b.cpp
 	g++ -Ofast -fopenmp sift_1b.cpp -o sift_1b
 
-run: sift
-	./sift_1b
+msift_dbg: sift_1b_multi.cpp
+	g++ -g -Ofast sift_1b_multi.cpp -o sift_1b_multi
 
-memprof: sift
-	heaptrack ./sift_1b
+msift: sift_1b_multi.cpp
+	g++ -Ofast -fopenmp sift_1b_multi.cpp -o sift_1b_multi
+
+run: msift
+	./sift_1b_multi
+
+memprof: msift
+	heaptrack ./sift_1b_multi
