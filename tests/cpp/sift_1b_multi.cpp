@@ -287,6 +287,12 @@ unsigned char *massb = nullptr;
 unsigned int *massQA = nullptr;
 unsigned char *massQ = nullptr;
 
+#define DATASETPATH "../../bigann/"
+#define SAVEPATH ""
+
+// #define DATASETPATH "./bigann/"
+// #define SAVEPATH "/scratch/hnswlib/multi/"
+
 void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M = 16, int num_idxs = 1) {
     // int subset_size_milllions = 1;
     // int efConstruction = 40;
@@ -302,11 +308,11 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
     size_t vecdim = 128;
     char path_index[1024];
     char path_gt[1024];
-    const char *path_q = "./bigann/bigann_query.bvecs";
-    const char *path_data = "./bigann/bigann_base.bvecs";
-    snprintf(path_index, sizeof(path_index), "/scratch/hnswlib/multi/sift1b_%dm_ef_%d_M_%d.bin", subset_size_milllions, efConstruction, M);
+    const char *path_q = DATASETPATH "bigann_query.bvecs";
+    const char *path_data = DATASETPATH "bigann_base.bvecs";
+    snprintf(path_index, sizeof(path_index), SAVEPATH "sift1b_%dm_ef_%d_M_%d.bin", subset_size_milllions, efConstruction, M);
 
-    snprintf(path_gt, sizeof(path_gt), "./bigann/gnd/idx_%dM.ivecs", subset_size_milllions);
+    snprintf(path_gt, sizeof(path_gt), DATASETPATH "gnd/idx_%dM.ivecs", subset_size_milllions);
 
     delete massb;
     massb = new unsigned char[vecdim];
@@ -356,7 +362,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
     for (int idx_num = 0; idx_num < num_idxs; ++idx_num) {
         size_t random_seed = 100 + idx_num;
         if (idx_num>0) {
-            snprintf(path_index, sizeof(path_index), "/scratch/hnswlib/multi/sift1b_%dm_ef_%d_M_%d_v%d.bin", idx_num, subset_size_milllions, efConstruction, M);
+            snprintf(path_index, sizeof(path_index), SAVEPATH "sift1b_%dm_ef_%d_M_%d_v%d.bin", idx_num, subset_size_milllions, efConstruction, M);
         }
         ifstream input(path_data, ios::binary);
         if (exists_test(path_index)) {
