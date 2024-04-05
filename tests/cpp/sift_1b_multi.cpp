@@ -304,7 +304,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
     char path_gt[1024];
     const char *path_q = "./bigann/bigann_query.bvecs";
     const char *path_data = "./bigann/bigann_base.bvecs";
-    snprintf(path_index, sizeof(path_index), "sift1b_%dm_ef_%d_M_%d.bin", subset_size_milllions, efConstruction, M);
+    snprintf(path_index, sizeof(path_index), "/scratch/hnswlib/multi/sift1b_%dm_ef_%d_M_%d.bin", subset_size_milllions, efConstruction, M);
 
     snprintf(path_gt, sizeof(path_gt), "./bigann/gnd/idx_%dM.ivecs", subset_size_milllions);
 
@@ -356,7 +356,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
     for (int idx_num = 0; idx_num < num_idxs; ++idx_num) {
         size_t random_seed = 100 + idx_num;
         if (idx_num>0) {
-            snprintf(path_index, sizeof(path_index), "sift1b_v%d_%dm_ef_%d_M_%d.bin", idx_num, subset_size_milllions, efConstruction, M);
+            snprintf(path_index, sizeof(path_index), "/scratch/hnswlib/multi/sift1b_v%d_%dm_ef_%d_M_%d.bin", idx_num, subset_size_milllions, efConstruction, M);
         }
         ifstream input(path_data, ios::binary);
         if (exists_test(path_index)) {
@@ -438,11 +438,13 @@ int main() {
     // vector<int> subsets = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
     vector<int> subsets = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
     for (auto subset: subsets) {
-        for (auto efConstruction: efConstructions) {
-            for(auto M : Ms) {
-                sift_test1B(subset, efConstruction, M, 3);
-            }
-        }
+        sift_test1B(subset, 200, 16, 3);
+
+        // for (auto efConstruction: efConstructions) {
+        //     for(auto M : Ms) {
+        //         sift_test1B(subset, efConstruction, M, 3);
+        //     }
+        // }
     }
     return 0;
 }
