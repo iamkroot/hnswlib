@@ -352,7 +352,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
     int in = 0;
     L2SpaceI l2space(vecdim);
 
-    HierarchicalNSW<int>* appr_alg[num_idxs];
+    std::unique_ptr<HierarchicalNSW<int>> appr_alg[num_idxs];
     for (int idx_num = 0; idx_num < num_idxs; ++idx_num) {
         size_t random_seed = 100 + idx_num;
         if (idx_num>0) {
@@ -361,7 +361,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
         ifstream input(path_data, ios::binary);
         if (exists_test(path_index)) {
             cout << "Loading index from " << path_index << ":\n";
-            appr_alg[idx_num] = new HierarchicalNSW<int>(&l2space, path_index, false);
+            appr_alg[idx_num] = std::make_unique<HierarchicalNSW<int>>(&l2space, path_index, false);
             cout << "Actual memory usage: " << getCurrentRSS() / 1000000 << " Mb \n";
         } else {
             cout << "Building index";
@@ -369,7 +369,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
                 cout << " v" << idx_num;
             }
             cout << ":\n";
-            appr_alg[idx_num] = new HierarchicalNSW<int>(&l2space, vecsize, M, efConstruction);
+            appr_alg[idx_num] = std::make_unique<HierarchicalNSW<int>>(&l2space, vecsize, M, efConstruction);
 
             input.read((char *) &in, 4);
             if (in != 128) {
