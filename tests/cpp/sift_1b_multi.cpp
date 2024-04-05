@@ -258,7 +258,7 @@ inline bool exists_test(const std::string &name) {
     ifstream f(name.c_str());
     return f.good();
 }
-
+/*
 HierarchicalNSW<int>* build_index(SpaceInterface<dist_t> *s, size_t vecsize, size_t vecdim, ifstream input, int efConstruction = 40, int M = 16) {
     cout << "Building index:\n";
     auto *appr_alg = new HierarchicalNSW<int>(s, vecsize, M, efConstruction);
@@ -281,7 +281,7 @@ HierarchicalNSW<int>* build_index(SpaceInterface<dist_t> *s, size_t vecsize, siz
         unsigned char mass[128];
         int j2 = 0;
 #pragma omp critical
-}
+}*/
 
 void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M = 16, int num_idxs = 1) {
     // int subset_size_milllions = 1;
@@ -339,24 +339,24 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
     int in = 0;
     L2SpaceI l2space(vecdim);
 
-    HierarchicalNSW<int> appr_alg[num_idxs];
+    HierarchicalNSW<int>* appr_alg[num_idxs];
     for (int idx_num = 0; idx_num < num_idxs; ++idx_num) {
         size_t random_seed = 100 + idx_num;
-        if (i>0) {
-            snprintf(path_index, sizeof(path_index), "sift1b_v%d_%dm_ef_%d_M_%d.bin", i, subset_size_milllions, efConstruction, M);
+        if (idx_num>0) {
+            snprintf(path_index, sizeof(path_index), "sift1b_v%d_%dm_ef_%d_M_%d.bin", idx_num, subset_size_milllions, efConstruction, M);
         }
         ifstream input(path_data, ios::binary);
         if (exists_test(path_index)) {
             cout << "Loading index from " << path_index << ":\n";
-            appr_alg = new HierarchicalNSW<int>(&l2space, path_index, false);
+            appr_alg[idx_num] = new HierarchicalNSW<int>(&l2space, path_index, false);
             cout << "Actual memory usage: " << getCurrentRSS() / 1000000 << " Mb \n";
         } else {
             cout << "Building index";
             if (num_idxs > 1) {
-                cout << " v" << i;
+                cout << " v" << idx_num;
             }
             cout << ":\n";
-            appr_alg = new HierarchicalNSW<int>(&l2space, vecsize, M, efConstruction);
+            appr_alg[idx_num] = new HierarchicalNSW<int>(&l2space, vecsize, M, efConstruction);
 
             input.read((char *) &in, 4);
             if (in != 128) {
@@ -369,7 +369,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
             //     mass[j] = massb[j] * (1.0f);
             // }
 
-            appr_alg->addPoint((void *) (massb), (size_t) 0);
+            appr_alg[idx_num]->addPoint((void *) (massb), (size_t) 0);
             int j1 = 0;
             StopW stopw = StopW();
             StopW stopw_full = StopW();
@@ -398,11 +398,11 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
                         stopw.reset();
                     }
                 }
-                appr_alg->addPoint((void *) (mass), (size_t) j2);
+                appr_alg[idx_num]->addPoint((void *) (mass), (size_t) j2);
             }
             input.close();
             cout << "Build time:" << 1e-6 * stopw_full.getElapsedTimeMicro() << "  seconds\n";
-            appr_alg->saveIndex(path_index);
+            appr_alg[idx_num]->saveIndex(path_index);
         }
     }
 
@@ -412,7 +412,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
     get_gt(massQA, massQ, mass, vecsize, qsize, l2space, vecdim, answers, k);
     cout << "Loaded gt\n";
     for (int i = 0; i < 1; i++)
-        test_vs_recall(massQ, vecsize, qsize, appr_alg[0], vecdim, answers, k);
+        test_vs_recall(massQ, vecsize, qsize, *appr_alg[0], vecdim, answers, k);
     cout << "Actual memory usage: " << getCurrentRSS() / 1000000 << " Mb \n";
     return;
 }
