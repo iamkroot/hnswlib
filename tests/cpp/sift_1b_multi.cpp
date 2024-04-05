@@ -3,6 +3,7 @@
 #include <queue>
 #include <chrono>
 #include "../../hnswlib/hnswlib.h"
+#include "prettyprint.hpp"
 
 
 #include <unordered_set>
@@ -153,65 +154,66 @@ get_gt(
     L2SpaceI &l2space,
     size_t vecdim,
     vector<std::priority_queue<std::pair<int, labeltype>>> &answers,
+    vector<std::unordered_set<labeltype>> &answers_sets,
     size_t k) {
     (vector<std::priority_queue<std::pair<int, labeltype >>>(qsize)).swap(answers);
+    (vector<std::unordered_set<labeltype>>(qsize)).swap(answers_sets);
     DISTFUNC<int> fstdistfunc_ = l2space.get_dist_func();
     cout << qsize << "\n";
     for (int i = 0; i < qsize; i++) {
         for (int j = 0; j < k; j++) {
             answers[i].emplace(0.0f, massQA[1000 * i + j]);
+            answers_sets[i].insert(massQA[1000 * i + j]);
         }
+        if (i < 10)
+        cout << answers_sets[i] <<endl;
     }
 }
 
 static constexpr bool DUMP = false;
+
+static inline int get_intersection_count(std::priority_queue<std::pair<int, labeltype >>&result, unordered_set<labeltype> &g, int top_n = INT32_MAX) {
+    // cout << g << endl;
+    int count = 0;
+    top_n = min(top_n, (int)result.size());
+    // cout << top_n << endl;
+    while (top_n--) {
+        if (g.find(result.top().second) != g.end()) {
+            count++;
+        }
+        result.pop();
+    }
+    return count;
+}
 
 static float
 test_approx(
     unsigned char *massQ,
     size_t vecsize,
     size_t qsize,
-    HierarchicalNSW<int> &appr_alg,
+    std::vector<HierarchicalNSW<int>*> &appr_algs,
     size_t vecdim,
     vector<std::priority_queue<std::pair<int, labeltype>>> &answers,
+    vector<std::unordered_set<labeltype>> &answers_sets,
     size_t k) {
     size_t correct = 0;
     size_t total = 0;
 
-    std::ofstream cpp_gnd("cpp_gnd");
-    std::ofstream cpp_hnsw("cpp_hnsw");
-    if (!cpp_gnd) {
-        cout << "AAAA\n";
-    }
     // uncomment to test in parallel mode:
     //#pragma omp parallel for
+    std::vector<std::priority_queue<std::pair<int, labeltype >>> results;
+    results.reserve(appr_algs.size());
     for (int i = 0; i < qsize; i++) {
-        std::priority_queue<std::pair<int, labeltype >> result = appr_alg.searchKnn(massQ + vecdim * i, k);
-        std::priority_queue<std::pair<int, labeltype >> gt(answers[i]);
-        unordered_set<labeltype> g;
-        total += gt.size();
+        results.clear();
 
-        while (gt.size()) {
-            if constexpr (DUMP)
-                cpp_gnd << gt.top().second << " ";
-            g.insert(gt.top().second);
-            gt.pop();
+        #pragma omp parallel for
+        for (auto &appr_alg : appr_algs) {
+            results.emplace_back(appr_alg->searchKnn(massQ + vecdim * i, k));
         }
-        if constexpr (DUMP)
-            cpp_gnd << "\n";
-
-        while (result.size()) {
-            if constexpr (DUMP)
-                cpp_hnsw << result.top().second << " ";
-            if (g.find(result.top().second) != g.end()) {
-                correct++;
-            } else {
-            }
-            result.pop();
-
-        }
-        if constexpr (DUMP)
-            cpp_hnsw << "\n";
+        unordered_set<labeltype> &g = answers_sets[i];
+        total += results[0].size();
+        // TODO: Combine the results from all the indexes.
+        correct += get_intersection_count(results[0], g);
     }
     return (1.0f * correct) / total;
 }
@@ -221,9 +223,10 @@ test_vs_recall(
     unsigned char *massQ,
     size_t vecsize,
     size_t qsize,
-    HierarchicalNSW<int> &appr_alg,
+    std::vector<HierarchicalNSW<int>*> &appr_algs,
     size_t vecdim,
     vector<std::priority_queue<std::pair<int, labeltype>>> &answers,
+    vector<std::unordered_set<labeltype>> &answers_sets,
     size_t k) {
     /*
     vector<size_t> efs;  // = { 10,10,10,10,10 };
@@ -240,10 +243,12 @@ test_vs_recall(
     vector<size_t> efs = {10, 20, 30, 40, 50, 100, 200, 300, 400};
 
     for (size_t ef : efs) {
-        appr_alg.setEf(ef);
+        for(auto &appr_alg: appr_algs){
+            appr_alg->setEf(ef);
+        }
         StopW stopw = StopW();
 
-        float recall = test_approx(massQ, vecsize, qsize, appr_alg, vecdim, answers, k);
+        float recall = test_approx(massQ, vecsize, qsize, appr_algs, vecdim, answers, answers_sets, k);
         float time_us_per_query = stopw.getElapsedTimeMicro() / qsize;
 
         cout << ef << "\t" << recall << "\t" << time_us_per_query << " us\n";
@@ -287,11 +292,11 @@ unsigned char *massb = nullptr;
 unsigned int *massQA = nullptr;
 unsigned char *massQ = nullptr;
 
-#define DATASETPATH "../../bigann/"
-#define SAVEPATH ""
+// #define DATASETPATH "../../bigann/"
+// #define SAVEPATH ""
 
-// #define DATASETPATH "./bigann/"
-// #define SAVEPATH "/scratch/hnswlib/multi/"
+#define DATASETPATH "./bigann/"
+#define SAVEPATH "/scratch/hnswlib/multi/"
 
 void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M = 16, int num_idxs = 1) {
     // int subset_size_milllions = 1;
@@ -358,7 +363,8 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
     int in = 0;
     L2SpaceI l2space(vecdim);
 
-    std::unique_ptr<HierarchicalNSW<int>> appr_alg[num_idxs];
+    std::vector<HierarchicalNSW<int>*> appr_algs(num_idxs);
+
     for (int idx_num = 0; idx_num < num_idxs; ++idx_num) {
         size_t random_seed = 100 + idx_num;
         if (idx_num>0) {
@@ -367,7 +373,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
         ifstream input(path_data, ios::binary);
         if (exists_test(path_index)) {
             cout << "Loading index from " << path_index << ":\n";
-            appr_alg[idx_num] = std::make_unique<HierarchicalNSW<int>>(&l2space, path_index, false);
+            appr_algs[idx_num] = new HierarchicalNSW<int>(&l2space, path_index, false);
             cout << "Actual memory usage: " << getCurrentRSS() / 1000000 << " Mb \n";
         } else {
             cout << "Building index";
@@ -375,7 +381,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
                 cout << " v" << idx_num;
             }
             cout << ":\n";
-            appr_alg[idx_num] = std::make_unique<HierarchicalNSW<int>>(&l2space, vecsize, M, efConstruction);
+            appr_algs[idx_num] = new HierarchicalNSW<int>(&l2space, vecsize, M, efConstruction);
 
             input.read((char *) &in, 4);
             if (in != 128) {
@@ -388,7 +394,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
             //     mass[j] = massb[j] * (1.0f);
             // }
 
-            appr_alg[idx_num]->addPoint((void *) (massb), (size_t) 0);
+            appr_algs[idx_num]->addPoint((void *) (massb), (size_t) 0);
             int j1 = 0;
             StopW stopw = StopW();
             StopW stopw_full = StopW();
@@ -417,22 +423,25 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
                         stopw.reset();
                     }
                 }
-                appr_alg[idx_num]->addPoint((void *) (mass), (size_t) j2);
+                appr_algs[idx_num]->addPoint((void *) (mass), (size_t) j2);
             }
             input.close();
             cout << "Build time:" << 1e-6 * stopw_full.getElapsedTimeMicro() << "  seconds\n";
-            appr_alg[idx_num]->saveIndex(path_index);
+            appr_algs[idx_num]->saveIndex(path_index);
         }
     }
-    return;
     vector<std::priority_queue<std::pair<int, labeltype >>> answers;
+    vector<std::unordered_set<labeltype>> answers_sets;
     size_t k = 10;
     cout << "Parsing gt:\n";
-    get_gt(massQA, massQ, mass, vecsize, qsize, l2space, vecdim, answers, k);
+    get_gt(massQA, massQ, mass, vecsize, qsize, l2space, vecdim, answers, answers_sets, k);
     cout << "Loaded gt\n";
     for (int i = 0; i < 1; i++)
-        test_vs_recall(massQ, vecsize, qsize, *appr_alg[0], vecdim, answers, k);
+        test_vs_recall(massQ, vecsize, qsize, appr_algs, vecdim, answers, answers_sets, k);
     cout << "Actual memory usage: " << getCurrentRSS() / 1000000 << " Mb \n";
+    for (auto &appr_alg: appr_algs) {
+        delete appr_alg;
+    }
     return;
 }
 
@@ -444,13 +453,13 @@ int main() {
     // vector<int> subsets = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
     vector<int> subsets = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
     for (auto subset: subsets) {
-        sift_test1B(subset, 200, 16, 3);
-
-        // for (auto efConstruction: efConstructions) {
-        //     for(auto M : Ms) {
-        //         sift_test1B(subset, efConstruction, M, 3);
-        //     }
-        // }
+        // sift_test1B(subset, 200, 16, 1);
+        // break;
+        for (auto efConstruction: efConstructions) {
+            for(auto M : Ms) {
+                sift_test1B(subset, efConstruction, M, 3);
+            }
+        }
     }
     return 0;
 }
