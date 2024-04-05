@@ -283,6 +283,10 @@ HierarchicalNSW<int>* build_index(SpaceInterface<dist_t> *s, size_t vecsize, siz
 #pragma omp critical
 }*/
 
+unsigned char *massb = nullptr;
+unsigned int *massQA = nullptr;
+unsigned char *massQ = nullptr;
+
 void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M = 16, int num_idxs = 1) {
     // int subset_size_milllions = 1;
     // int efConstruction = 40;
@@ -304,11 +308,15 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
 
     snprintf(path_gt, sizeof(path_gt), "./bigann/gnd/idx_%dM.ivecs", subset_size_milllions);
 
-    unsigned char *massb = new unsigned char[vecdim];
+    delete massb;
+    massb = new unsigned char[vecdim];
 
     cout << "Loading GT:\n";
     ifstream inputGT(path_gt, ios::binary);
-    unsigned int *massQA = new unsigned int[qsize * 1000];
+
+    delete massQA;
+    massQA = new unsigned int[qsize * 1000];
+
     for (int i = 0; i < qsize; i++) {
         int t;
         inputGT.read((char *) &t, 4);
@@ -321,7 +329,8 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
     inputGT.close();
 
     cout << "Loading queries:\n";
-    unsigned char *massQ = new unsigned char[qsize * vecdim];
+    delete massQ;
+    massQ = new unsigned char[qsize * vecdim];
     ifstream inputQ(path_q, ios::binary);
 
     for (int i = 0; i < qsize; i++) {
@@ -409,7 +418,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
             appr_alg[idx_num]->saveIndex(path_index);
         }
     }
-
+    return;
     vector<std::priority_queue<std::pair<int, labeltype >>> answers;
     size_t k = 10;
     cout << "Parsing gt:\n";
@@ -426,13 +435,12 @@ int main() {
     vector<int> efConstructions = {200};
     // vector<int> efConstructions = {100, 200};
     // vector<int> efConstructions = {10, 20, 40, 100, 200};
-    vector<int> subsets = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
     // vector<int> subsets = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
+    vector<int> subsets = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
     for (auto subset: subsets) {
         for (auto efConstruction: efConstructions) {
             for(auto M : Ms) {
-                sift_test1B(subset, efConstruction, M, 2);
-                return 0;
+                sift_test1B(subset, efConstruction, M, 3);
             }
         }
     }
