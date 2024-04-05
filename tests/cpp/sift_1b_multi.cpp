@@ -460,7 +460,8 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
 }
 
 int main() {
-    vector<int> Ms = {16, 32};
+    vector<int> Ms = {16};
+    // vector<int> Ms = {16, 32};
     vector<int> efConstructions = {200};
     // vector<int> efConstructions = {100, 200};
     // vector<int> efConstructions = {10, 20, 40, 100, 200};
