@@ -225,6 +225,7 @@ test_vs_recall(
     size_t vecdim,
     vector<std::priority_queue<std::pair<int, labeltype>>> &answers,
     size_t k) {
+    /*
     vector<size_t> efs;  // = { 10,10,10,10,10 };
     for (int i = k; i < 30; i++) {
         efs.push_back(i);
@@ -235,6 +236,9 @@ test_vs_recall(
     for (int i = 100; i < 500; i += 40) {
         efs.push_back(i);
     }
+    */
+    vector<size_t> efs = {10, 20, 30, 40, 50, 100, 200, 300, 400};
+
     for (size_t ef : efs) {
         appr_alg.setEf(ef);
         StopW stopw = StopW();
