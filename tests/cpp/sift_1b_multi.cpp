@@ -472,7 +472,8 @@ int main() {
         // break;
         for (auto efConstruction: efConstructions) {
             for(auto M : Ms) {
-                sift_test1B(subset, efConstruction, M, 3);
+                for(int i = 10; i > 0; --i)
+                    sift_test1B(subset, efConstruction, M, i);
             }
         }
     }
