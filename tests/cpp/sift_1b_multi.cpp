@@ -446,12 +446,12 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
     }
     vector<std::priority_queue<std::pair<int, labeltype >>> answers;
     vector<std::unordered_set<labeltype>> answers_sets;
-    size_t k = 10;
-    cout << "Parsing gt:\n";
-    get_gt(massQA, massQ, mass, vecsize, qsize, l2space, vecdim, answers, answers_sets, k);
-    cout << "Loaded gt\n";
-    for (int i = 0; i < 1; i++)
-        test_vs_recall(massQ, vecsize, qsize, appr_algs, vecdim, answers, answers_sets, k);
+    // size_t k = 10;
+    // cout << "Parsing gt:\n";
+    // get_gt(massQA, massQ, mass, vecsize, qsize, l2space, vecdim, answers, answers_sets, k);
+    // cout << "Loaded gt\n";
+    // for (int i = 0; i < 1; i++)
+    //     test_vs_recall(massQ, vecsize, qsize, appr_algs, vecdim, answers, answers_sets, k);
     cout << "Actual memory usage: " << getCurrentRSS() / 1000000 << " Mb \n";
     for (auto &appr_alg: appr_algs) {
         delete appr_alg;
