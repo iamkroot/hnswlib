@@ -382,7 +382,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
     for (int idx_num = 0; idx_num < num_idxs; ++idx_num) {
         size_t random_seed = 100 + idx_num;
         if (idx_num>0) {
-            snprintf(path_index, sizeof(path_index), SAVEPATH "sift1b_v%d_%dm_ef_%d_M_%d.bin", idx_num, subset_size_milllions, efConstruction, M);
+            snprintf(path_index, sizeof(path_index), SAVEPATH "sift1b_%dm_ef_%d_M_%d_v%d.bin", subset_size_milllions, efConstruction, M, idx_num);
         }
         ifstream input(path_data, ios::binary);
         if (exists_test(path_index)) {
@@ -413,7 +413,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
             StopW stopw = StopW();
             StopW stopw_full = StopW();
             size_t report_every = 100000;
-#pragma omp parallel for
+#pragma omp parallel for num_threads(32)
             for (int i = 1; i < vecsize; i++) {
                 unsigned char mass[128];
                 int j2 = 0;
@@ -460,11 +460,11 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
 }
 
 int main() {
-    vector<int> Ms = {16};
-    // vector<int> Ms = {16, 32};
-    vector<int> efConstructions = {200};
+    // vector<int> Ms = {16};
+    vector<int> Ms = {8, 16, 32};
+    // vector<int> efConstructions = {200};
     // vector<int> efConstructions = {100, 200};
-    // vector<int> efConstructions = {10, 20, 40, 100, 200};
+    vector<int> efConstructions = {10, 20, 40, 100, 200};
     // vector<int> subsets = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
     vector<int> subsets = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
     for (auto subset: subsets) {
