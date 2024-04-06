@@ -456,6 +456,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
     for (auto &appr_alg: appr_algs) {
         delete appr_alg;
     }
+    delete mass;
     return;
 }
 
@@ -472,8 +473,9 @@ int main() {
         // break;
         for (auto efConstruction: efConstructions) {
             for(auto M : Ms) {
-                for(int i = 10; i > 0; --i)
+                for(int i = 10; i > 0; --i){
                     sift_test1B(subset, efConstruction, M, i);
+                }
             }
         }
     }
