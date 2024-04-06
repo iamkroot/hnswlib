@@ -443,6 +443,8 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
             cout << "Build time:" << 1e-6 * stopw_full.getElapsedTimeMicro() << "  seconds\n";
             appr_algs[idx_num]->saveIndex(path_index);
         }
+        // we only want to build it for now
+        delete appr_algs[idx_num];
     }
     vector<std::priority_queue<std::pair<int, labeltype >>> answers;
     vector<std::unordered_set<labeltype>> answers_sets;
