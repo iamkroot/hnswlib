@@ -386,9 +386,10 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
         }
         ifstream input(path_data, ios::binary);
         if (exists_test(path_index)) {
-            cout << "Loading index from " << path_index << ":\n";
-            appr_algs[idx_num] = new HierarchicalNSW<int>(&l2space, path_index, false);
-            cout << "Actual memory usage: " << getCurrentRSS() / 1000000 << " Mb \n";
+            cout << "Already found index from " << path_index << ":\n";
+            // appr_algs[idx_num] = new HierarchicalNSW<int>(&l2space, path_index, false);
+            // cout << "Actual memory usage: " << getCurrentRSS() / 1000000 << " Mb \n";
+            continue;
         } else {
             cout << "Building index";
             if (num_idxs > 1) {
