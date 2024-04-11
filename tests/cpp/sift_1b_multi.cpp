@@ -377,7 +377,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
     int in = 0;
     L2SpaceI l2space(vecdim);
 
-    std::vector<HierarchicalNSW<int>*> appr_algs(num_idxs);
+    std::vector<HierarchicalNSW<int>*> appr_algs(num_idxs, nullptr);
 
     for (int idx_num = 0; idx_num < num_idxs; ++idx_num) {
         size_t random_seed = 100 + idx_num;
