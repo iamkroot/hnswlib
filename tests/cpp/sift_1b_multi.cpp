@@ -199,7 +199,7 @@ test_approx(
     size_t correct0 = 0;
     size_t correct = 0;
     size_t total = 0;
-
+    int num_idxs = appr_algs.size();
     // uncomment to test in parallel mode:
     //#pragma omp parallel for
     std::vector<std::priority_queue<std::pair<int, labeltype >>> results;
@@ -207,7 +207,7 @@ test_approx(
     for (int i = 0; i < qsize; i++) {
         results.clear();
 
-        #pragma omp parallel for
+        #pragma omp parallel for num_threads(num_idxs)
         for (auto &appr_alg : appr_algs) {
             results.emplace_back(appr_alg->searchKnn(massQ + vecdim * i, k));
         }
@@ -228,7 +228,7 @@ test_approx(
         }
         correct += get_intersection_count(result, g);
     }
-    cout << (1.0f * correct0) / total << endl; 
+    cout << "single idx recall " << (1.0f * correct0) / total << endl; 
     return (1.0f * correct) / total;
 }
 
@@ -306,11 +306,11 @@ unsigned char *massb = nullptr;
 unsigned int *massQA = nullptr;
 unsigned char *massQ = nullptr;
 
-// #define DATASETPATH "../../bigann/"
-// #define SAVEPATH ""
+#define DATASETPATH "../../bigann/"
+#define SAVEPATH ""
 
-#define DATASETPATH "./bigann/"
-#define SAVEPATH "/scratch/hnswlib/multi/"
+// #define DATASETPATH "./bigann/"
+// #define SAVEPATH "/scratch/hnswlib/multi/"
 
 #define ONLY_BUILD
 #undef ONLY_BUILD
@@ -474,16 +474,18 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
 }
 
 int main() {
-    // vector<int> Ms = {16};
-    vector<int> Ms = {8, 16, 32};
-    // vector<int> efConstructions = {200};
+    vector<int> Ms = {16};
+    // vector<int> Ms = {8, 16, 32};
+    vector<int> efConstructions = {200};
     // vector<int> efConstructions = {100, 200};
-    vector<int> efConstructions = {10, 20, 40, 100, 200};
+    // vector<int> efConstructions = {10, 20, 40, 100, 200};
     // vector<int> subsets = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
     vector<int> subsets = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
     for (auto subset: subsets) {
-        // sift_test1B(subset, 200, 16, 2);
-        // break;
+        for(int i = 1; i <= 10; ++i){        
+           sift_test1B(subset, 200, 16, i);
+        }
+        break;
         for (auto efConstruction: efConstructions) {
             for(auto M : Ms) {
                 sift_test1B(subset, efConstruction, M, 10);
