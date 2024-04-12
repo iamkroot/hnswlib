@@ -312,6 +312,9 @@ unsigned char *massQ = nullptr;
 #define DATASETPATH "./bigann/"
 #define SAVEPATH "/scratch/hnswlib/multi/"
 
+#define ONLY_BUILD
+#undef ONLY_BUILD
+
 void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M = 16, int num_idxs = 1) {
     // int subset_size_milllions = 1;
     // int efConstruction = 40;
@@ -387,9 +390,10 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
         ifstream input(path_data, ios::binary);
         if (exists_test(path_index)) {
             cout << "Already found index from " << path_index << ":\n";
-            // appr_algs[idx_num] = new HierarchicalNSW<int>(&l2space, path_index, false);
-            // cout << "Actual memory usage: " << getCurrentRSS() / 1000000 << " Mb \n";
-            continue;
+#ifndef ONLY_BUILD
+            appr_algs[idx_num] = new HierarchicalNSW<int>(&l2space, path_index, false);
+            cout << "Actual memory usage: " << getCurrentRSS() / 1000000 << " Mb \n";
+#endif // ONLY_BUILD
         } else {
             cout << "Building index";
             if (num_idxs > 1) {
@@ -443,19 +447,24 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
             input.close();
             cout << "Build time:" << 1e-6 * stopw_full.getElapsedTimeMicro() << "  seconds\n";
             appr_algs[idx_num]->saveIndex(path_index);
+#ifdef ONLY_BUILD
+            // we only want to build it for now
+            delete appr_algs[idx_num];
+            appr_algs[idx_num]= nullptr;
+#endif // ONLY_BUILD
         }
-        // we only want to build it for now
-        delete appr_algs[idx_num];
-        appr_algs[idx_num]= nullptr;
     }
+#ifndef ONLY_BUILD
     vector<std::priority_queue<std::pair<int, labeltype >>> answers;
     vector<std::unordered_set<labeltype>> answers_sets;
-    // size_t k = 10;
-    // cout << "Parsing gt:\n";
-    // get_gt(massQA, massQ, mass, vecsize, qsize, l2space, vecdim, answers, answers_sets, k);
-    // cout << "Loaded gt\n";
-    // for (int i = 0; i < 1; i++)
-    //     test_vs_recall(massQ, vecsize, qsize, appr_algs, vecdim, answers, answers_sets, k);
+
+    size_t k = 10;
+    cout << "Parsing gt:\n";
+    get_gt(massQA, massQ, mass, vecsize, qsize, l2space, vecdim, answers, answers_sets, k);
+    cout << "Loaded gt\n";
+    for (int i = 0; i < 1; i++)
+        test_vs_recall(massQ, vecsize, qsize, appr_algs, vecdim, answers, answers_sets, k);
+#endif // ONLY_BUILD
     cout << "Actual memory usage: " << getCurrentRSS() / 1000000 << " Mb \n";
     for (auto &appr_alg: appr_algs) {
         delete appr_alg;
