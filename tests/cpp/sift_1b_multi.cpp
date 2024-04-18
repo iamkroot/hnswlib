@@ -217,12 +217,17 @@ test_approx(
         correct0 += get_intersection_count(result0, g);
         // Combine the results from all the indexes.
         std::priority_queue<std::pair<int, labeltype >> result;
+        unordered_set<labeltype> included;
         for (auto &res: results) {
             while (res.size()) {
-                result.emplace(res.top());
+                if (included.find(res.top().second) == included.end()) {
+                    result.emplace(res.top());
+                    included.insert(res.top().second);
+                }
                 res.pop();
             }
             while(result.size() > k) {
+                included.erase(result.top().second);
                 result.pop();
             }
         }
