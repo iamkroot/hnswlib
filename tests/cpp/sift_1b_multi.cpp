@@ -311,11 +311,11 @@ unsigned char *massb = nullptr;
 unsigned int *massQA = nullptr;
 unsigned char *massQ = nullptr;
 
-#define DATASETPATH "../../bigann/"
-#define SAVEPATH ""
+// #define DATASETPATH "../../bigann/"
+// #define SAVEPATH ""
 
-// #define DATASETPATH "./bigann/"
-// #define SAVEPATH "/scratch/hnswlib/multi/"
+#define DATASETPATH "./bigann/"
+#define SAVEPATH "/scratch/hnswlib/multi/"
 
 #define ONLY_BUILD
 #undef ONLY_BUILD
@@ -479,23 +479,23 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
 }
 
 int main() {
-    vector<int> Ms = {16};
-    // vector<int> Ms = {8, 16, 32};
-    vector<int> efConstructions = {200};
-    // vector<int> efConstructions = {100, 200};
+    // vector<int> Ms = {16};
+    vector<int> Ms = {8, 16, 32};
+    // vector<int> efConstructions = {200};
+    vector<int> efConstructions = {100, 200};
     // vector<int> efConstructions = {10, 20, 40, 100, 200};
     // vector<int> subsets = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
     vector<int> subsets = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
     for (auto subset: subsets) {
-        for(int i = 1; i <= 10; ++i){        
-           sift_test1B(subset, 200, 16, i);
-        }
-        break;
+        // for(int i = 1; i <= 10; ++i){        
+        //    sift_test1B(subset, 200, 16, i);
+        // }
+        // break;
         for (auto efConstruction: efConstructions) {
             for(auto M : Ms) {
-                sift_test1B(subset, efConstruction, M, 10);
-                // for(int i = 10; i > 0; --i){
-                // }
+                for(int i = 10; i > 0; --i){
+                    sift_test1B(subset, efConstruction, M, i);
+                }
             }
         }
     }
