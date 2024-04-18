@@ -438,6 +438,23 @@ namespace std
     {
         return stream << ::pretty_print::print_container_helper<T, TChar, TCharTraits>(container);
     }
+        
+    template<typename T, typename TChar, typename TCharTraits>
+    inline typename enable_if< ::pretty_print::is_container<T>::value,
+                              basic_ostream<TChar, TCharTraits> &>::type
+    operator<<(basic_ostream<TChar, TCharTraits> & stream, std::priority_queue<T> pq) {
+        stream << "{";
+        while(!pq.empty()) {
+            stream << pq.top();
+            pq.pop();
+            if (!pq.empty()) {
+                stream << ", ";
+            }
+        }
+        stream << "}";
+        return stream;
+    }
+
 }
 
 
