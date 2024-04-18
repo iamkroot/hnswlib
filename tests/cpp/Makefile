@@ -8,7 +8,8 @@ msift_dbg: sift_1b_multi.cpp
 	g++ -g -Ofast sift_1b_multi.cpp -o sift_1b_multi
 
 msift: sift_1b_multi.cpp
-	g++ -Ofast -fopenmp sift_1b_multi.cpp -o sift_1b_multi
+	g++ -Ofast sift_1b_multi.cpp -o sift_1b_multi
+# 	g++ -Ofast -fopenmp sift_1b_multi.cpp -o sift_1b_multi
 
 run: msift
 	./sift_1b_multi
