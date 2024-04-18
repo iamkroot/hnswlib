@@ -387,6 +387,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
 
     std::vector<HierarchicalNSW<int>*> appr_algs(num_idxs, nullptr);
 
+#pragma omp parallel for num_threads(num_idxs)
     for (int idx_num = 0; idx_num < num_idxs; ++idx_num) {
         size_t random_seed = 100 + idx_num;
         if (idx_num>0) {
@@ -423,7 +424,7 @@ void sift_test1B(int subset_size_milllions = 1, int efConstruction = 40, int M =
             StopW stopw = StopW();
             StopW stopw_full = StopW();
             size_t report_every = 100000;
-#pragma omp parallel for num_threads(32)
+// #pragma omp parallel for num_threads(32)
             for (int i = 1; i < vecsize; i++) {
                 unsigned char mass[128];
                 int j2 = 0;
