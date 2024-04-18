@@ -215,6 +215,20 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
         return (int) r;
     }
 
+    static int getDeterministicLevel(double reverse_size, int id) {
+        std::mt19937_64 newgen;
+        newgen.seed(id);
+        // need to discard certain items to get enough variation
+        newgen.discard(100000);
+        std::uniform_real_distribution<double> distribution(0.0, 1.0);
+        double normVal = distribution(newgen);
+        // avoid divide by 0
+        if (normVal == 0) normVal = 1;
+        double r = -log(normVal) * reverse_size;
+
+        return (int) r;
+    }
+
     size_t getMaxElements() {
         return max_elements_;
     }
@@ -1190,6 +1204,7 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
 
         std::unique_lock <std::mutex> lock_el(link_list_locks_[cur_c]);
         int curlevel = getRandomLevel(mult_);
+        // int curlevel = getDeterministicLevel(mult_, cur_c);
         if (level > 0)
             curlevel = level;
 
